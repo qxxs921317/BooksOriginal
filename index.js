@@ -59,7 +59,9 @@ function mount(sheld) {
     frame.append(photoButton, credit);
     const caption = create('figcaption', 'bop-caption');
     coverName = create('div', 'bop-name');
-    caption.append(coverName);
+    const captionRule = create('div', 'bop-caption-rule');
+    captionRule.setAttribute('aria-hidden', 'true');
+    caption.append(coverName, captionRule);
     figure.append(frame, caption);
     panel.append(summary, figure);
     const chat = sheld.querySelector('#chat');

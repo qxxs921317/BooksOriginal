@@ -2,10 +2,14 @@ import { getContext } from '../../../extensions.js';
 import { isPortraitTheme, resolvePortrait } from './portrait-core.js';
 
 const FOLD_KEY = 'books-original-portrait:mobile-folded:v1';
+const POSITION_PREFIX = 'books-original-portrait:mobile-position:v1:';
+const DEFAULT_POSITION = 30;
+const positionCache = new Map();
 const mq = matchMedia('(max-width: 767px)');
 let folded = false;
 try { folded = localStorage.getItem(FOLD_KEY) === 'true'; } catch { /* Private browser mode. */ }
 let panel, masthead, modal, image, modalImage, coverName, summaryName, foldLabel, status;
+let positionControls, positionInput, positionReset;
 let activeKey = '', activeSource = '', sequence = 0, queued = false, lastTheme = null;
 let customStyle, chatElement;
 const themeObserver = new MutationObserver(schedule);
@@ -19,6 +23,37 @@ function create(tag, className, text) {
     if (className) node.className = className;
     if (text !== undefined) node.textContent = text;
     return node;
+}
+
+function normalizePosition(value) {
+    const numeric = Number(value);
+    return value === null || value === '' || !Number.isFinite(numeric)
+        ? DEFAULT_POSITION : Math.min(100, Math.max(0, Math.round(numeric)));
+}
+
+function loadPosition(key) {
+    if (positionCache.has(key)) return positionCache.get(key);
+    let value = DEFAULT_POSITION;
+    try { value = normalizePosition(localStorage.getItem(POSITION_PREFIX + encodeURIComponent(key))); } catch { /* Use in-memory preferences when storage is unavailable. */ }
+    positionCache.set(key, value);
+    return value;
+}
+
+function applyPosition(value, save = false) {
+    const position = normalizePosition(value);
+    panel.style.setProperty('--bop-mobile-y', `${position}%`);
+    positionInput.value = String(position);
+    positionInput.setAttribute('aria-valuetext', `위쪽에서 ${position}%`);
+    if (save && activeKey) {
+        positionCache.set(activeKey, position);
+        try { localStorage.setItem(POSITION_PREFIX + encodeURIComponent(activeKey), String(position)); } catch { /* Keep the current session's selection. */ }
+    }
+}
+
+function setPositionAvailable(available) {
+    positionControls.hidden = !available;
+    positionInput.disabled = !available;
+    positionReset.disabled = !available;
 }
 
 function updateFold() {
@@ -65,7 +100,36 @@ function mount(sheld) {
     captionRule.setAttribute('aria-hidden', 'true');
     caption.append(coverName, captionRule);
     figure.append(frame, caption);
-    panel.append(summary, figure);
+    positionControls = create('div', 'bop-position-controls');
+    positionControls.setAttribute('role', 'group');
+    positionControls.setAttribute('aria-label', '사진 상하 위치');
+    const topLabel = create('span', 'bop-position-end', '위');
+    const bottomLabel = create('span', 'bop-position-end', '아래');
+    topLabel.setAttribute('aria-hidden', 'true');
+    bottomLabel.setAttribute('aria-hidden', 'true');
+    positionInput = create('input', 'bop-position-slider');
+    positionInput.id = 'bop-position-slider';
+    positionInput.type = 'range';
+    positionInput.min = '0';
+    positionInput.max = '100';
+    positionInput.step = '1';
+    positionInput.value = String(DEFAULT_POSITION);
+    positionInput.setAttribute('aria-label', '사진 상하 위치');
+    positionReset = create('button', 'bop-position-reset', '초기화');
+    positionReset.type = 'button';
+    positionReset.setAttribute('aria-label', '사진 위치 초기화');
+    positionControls.append(topLabel, positionInput, bottomLabel, positionReset);
+    panel.append(summary, figure, positionControls);
+    setPositionAvailable(false);
+    positionInput.addEventListener('input', () => {
+        if (mq.matches && activeSource && !positionInput.disabled) applyPosition(positionInput.value);
+    });
+    positionInput.addEventListener('change', () => {
+        if (mq.matches && activeSource && !positionInput.disabled) applyPosition(positionInput.value, true);
+    });
+    positionReset.addEventListener('click', () => {
+        if (mq.matches && activeSource) applyPosition(DEFAULT_POSITION, true);
+    });
     const chat = sheld.querySelector('#chat');
     sheld.insertBefore(masthead, chat);
     sheld.insertBefore(panel, chat);
@@ -107,6 +171,8 @@ function showPortrait(portrait) {
     const previousSource = activeSource;
     activeKey = portrait.key;
     activeSource = portrait.source;
+    applyPosition(loadPosition(activeKey));
+    setPositionAvailable(false);
     const current = ++sequence;
     image.onload = image.onerror = null;
     image.removeAttribute('src');
@@ -119,11 +185,13 @@ function showPortrait(portrait) {
         if (sequence !== current) return;
         image.hidden = false;
         status.hidden = true;
+        setPositionAvailable(true);
     };
     image.onerror = () => {
         if (sequence !== current) return;
         image.hidden = true;
         status.hidden = false;
+        setPositionAvailable(false);
         status.textContent = '사진을 불러오지 못했어요. 캐릭터 사진을 확인해 주세요.';
     };
     image.src = portrait.source;
@@ -167,6 +235,7 @@ function refresh() {
         image.onload = image.onerror = null;
         image.removeAttribute('src');
         image.hidden = true;
+        setPositionAvailable(false);
         coverName.textContent = '';
         if (modal?.open) modal.close();
     }

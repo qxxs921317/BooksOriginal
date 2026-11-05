@@ -1,6 +1,7 @@
 /* BooksOriginal Portrait companion. Inert with every other theme. */
 #bop-masthead, #bop-cover, #bop-lightbox { display: none; }
 #bop-cover[hidden], #bop-cover [hidden], #bop-lightbox [hidden] { display: none !important; }
+#bop-cover .bop-position-controls { display: none; }
 
 body.bop-active {
     --bop-paper: #fff;
@@ -390,7 +391,82 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         height: clamp(160px, 28vh, 300px);
         height: clamp(160px, 28dvh, 300px);
     }
-    body.bop-active #bop-cover .bop-image { object-position: 50% 30% !important; }
+    body.bop-active #bop-cover .bop-image { object-position: 50% var(--bop-mobile-y, 30%) !important; }
+    body.bop-active #bop-cover .bop-position-controls {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: 9px;
+        min-height: 34px;
+        margin: 2px 0 0;
+        padding: 0 2px;
+        color: var(--bop-muted);
+        background: var(--bop-paper);
+        font: 400 11px/1.4 'Noto Serif KR', Georgia, serif;
+    }
+    body.bop-active #bop-cover .bop-position-slider {
+        display: block;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 26px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        touch-action: pan-y;
+    }
+    body.bop-active #bop-cover .bop-position-slider::-webkit-slider-runnable-track {
+        height: 2px;
+        border: 0;
+        border-radius: 2px;
+        background: var(--bop-line);
+    }
+    body.bop-active #bop-cover .bop-position-slider::-webkit-slider-thumb {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        margin-top: -6px;
+        border: 1px solid var(--bop-ink);
+        border-radius: 50%;
+        background: var(--bop-paper);
+        box-shadow: none;
+    }
+    body.bop-active #bop-cover .bop-position-slider::-moz-range-track {
+        height: 2px;
+        border: 0;
+        border-radius: 2px;
+        background: var(--bop-line);
+    }
+    body.bop-active #bop-cover .bop-position-slider::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        border: 1px solid var(--bop-ink);
+        border-radius: 50%;
+        background: var(--bop-paper);
+        box-shadow: none;
+    }
+    body.bop-active #bop-cover .bop-position-reset {
+        margin: 0;
+        padding: 6px 2px 6px 5px;
+        min-height: 32px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--bop-muted);
+        font: inherit;
+        box-shadow: none;
+        cursor: pointer;
+    }
+    body.bop-active #bop-cover .bop-position-slider:focus-visible,
+    body.bop-active #bop-cover .bop-position-reset:focus-visible {
+        outline: 2px solid var(--bop-ink);
+        outline-offset: 2px;
+    }
     body.bop-active .bop-photo-credit { display: none; }
     body.bop-active .bop-caption {
         position: absolute;

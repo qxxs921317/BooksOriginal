@@ -26,6 +26,8 @@ function updateFold() {
     const open = !mq.matches || !folded;
     if (panel.open !== open) panel.open = open;
     foldLabel.textContent = open ? '사진 접기' : '사진 펼치기';
+    summaryName.textContent = mq.matches ? 'BooksOriginal'
+        : panel.dataset.group === 'true' ? 'GROUP PORTRAIT' : 'CHARACTER PORTRAIT';
 }
 
 function mount(sheld) {
@@ -97,6 +99,7 @@ function mount(sheld) {
 }
 
 function showPortrait(portrait) {
+    panel.dataset.group = String(portrait.group);
     coverName.textContent = portrait.name;
     image.alt = `${portrait.name} 캐릭터 사진`;
     summaryName.textContent = portrait.group ? 'GROUP PORTRAIT' : 'CHARACTER PORTRAIT';

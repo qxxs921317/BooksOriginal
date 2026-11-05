@@ -323,7 +323,8 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     body.bop-active { --sheldWidth: 100vw; }
     body.bop-active #sheld {
         width: 100% !important;
-        padding: 0 14px max(6px, env(safe-area-inset-bottom)) !important;
+        padding: 0 8px 0 !important;
+        padding: 0 max(8px, env(safe-area-inset-right)) max(0px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
         border-left: 0 !important;
         border-right: 0 !important;
         column-gap: 0;
@@ -350,16 +351,19 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     }
     body.bop-active #sheld > #extensionConnectionProfiles { grid-area: profiles !important; min-width: 0; }
     body.bop-active #sheld > #top_chat_stmb_jobs { grid-area: jobs !important; min-width: 0; }
-    body.bop-active #bop-masthead { padding: 17px 0; margin-bottom: 10px; }
+    /* The mobile wordmark shares the photo toggle row instead of consuming a header. */
+    body.bop-active #bop-masthead { display: none !important; padding: 0 !important; margin: 0 !important; }
     body.bop-active .bop-wordmark { font-size: 25px; }
     body.bop-active .bop-edition { font-size: 9px; letter-spacing: 1px; }
-    body.bop-active #bop-cover { margin: 0 0 10px; padding: 0; }
+    body.bop-active #bop-cover { margin: 0 0 6px; padding: 0; }
     body.bop-active #bop-cover .bop-summary {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        min-height: 36px;
+        min-height: 32px;
+        margin: 0;
+        padding: 0;
         list-style: none;
         color: var(--bop-muted);
         font: 400 10px/1.4 Arial, sans-serif;
@@ -367,8 +371,13 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         cursor: pointer;
     }
     body.bop-active #bop-cover .bop-summary::-webkit-details-marker { display: none; }
+    body.bop-active #bop-cover .bop-summary-name {
+        font: 500 18px/1.2 var(--bop-serif);
+        color: var(--bop-ink);
+        letter-spacing: .5px;
+    }
     body.bop-active #bop-cover .bop-fold-label {
-        padding: 8px 0 8px 10px;
+        padding: 6px 0 6px 10px;
         font: 400 12px/1.5 'Noto Serif KR', Georgia, serif;
         text-decoration: underline;
         text-underline-offset: 4px;
@@ -396,8 +405,26 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     body.bop-active .bop-caption .bop-kicker { color: #fff; font-size: 9px; letter-spacing: 2px; }
     body.bop-active .bop-caption .bop-name { color: #fff; margin: 4px 0 0; font-size: 31px; }
     body.bop-active .bop-tagline, body.bop-active .bop-caption-rule, body.bop-active .bop-motto { display: none; }
-    body.bop-active #chat { padding: 0 2px 8px 0 !important; scrollbar-gutter: auto; }
-    body.bop-active #chat .mes_text { font-size: 13px !important; }
+    body.bop-active #chat { padding: 0 0 6px !important; scrollbar-gutter: auto; }
+    /* Remove stacked padding from the old theme's message and message-block wrappers. */
+    body.bop-active #chat .mes,
+    body.bop-active #chat .mes .mes_block {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+    body.bop-active #chat .mes .mes_text {
+        font-size: 13px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
     body.bop-active #send_textarea { font-size: 16px !important; }
     body.bop-active #bop-lightbox .bop-lightbox-close { min-width: 60px; min-height: 44px; top: 0; }
 }

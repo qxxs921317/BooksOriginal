@@ -32,7 +32,7 @@ function mount(sheld) {
     if (panel?.isConnected) return;
     masthead = create('header', 'bop-masthead');
     masthead.id = 'bop-masthead';
-    masthead.append(create('span', 'bop-wordmark', 'BooksOriginal'), create('span', 'bop-edition', 'A STORY TO REMEMBER'));
+    masthead.append(create('span', 'bop-wordmark', 'BooksOriginal'));
 
     panel = create('details', 'bop-cover');
     panel.id = 'bop-cover';
@@ -58,9 +58,8 @@ function mount(sheld) {
     credit.append(create('span', '', 'CHARACTER PORTRAIT'), create('span', '', '✧'));
     frame.append(photoButton, credit);
     const caption = create('figcaption', 'bop-caption');
-    const kicker = create('div', 'bop-kicker', 'THE PROTAGONIST');
     coverName = create('div', 'bop-name');
-    caption.append(kicker, coverName, create('div', 'bop-tagline', 'SOME STORIES STAY WITH YOU.'), create('div', 'bop-caption-rule'), create('p', 'bop-motto', '다음 장에서도, 당신을 기다릴게.'));
+    caption.append(coverName);
     figure.append(frame, caption);
     panel.append(summary, figure);
     const chat = sheld.querySelector('#chat');

@@ -153,6 +153,12 @@ body.bop-active .bop-caption-rule {
     background: var(--bop-ink);
 }
 body.bop-active .bop-motto { margin: 0; font-size: 12px; line-height: 1.8; color: var(--bop-muted); }
+/* Remove the old slogans even when a browser briefly keeps the older script cached. */
+body.bop-active .bop-edition,
+body.bop-active .bop-tagline,
+body.bop-active .bop-caption-rule,
+body.bop-active .bop-motto,
+body.bop-active .bop-kicker { display: none !important; }
 body.bop-active #chat {
     grid-area: chat;
     min-width: 0 !important;
@@ -261,12 +267,29 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         border-left: 0 !important;
         border-right: 0 !important;
         column-gap: 0;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+        grid-template-areas: 'topbar' 'profiles' 'jobs' 'masthead' 'chat' 'compose';
     }
     body.bop-active.bop-has-portrait #sheld {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto auto minmax(0, 1fr) auto;
-        grid-template-areas: 'masthead' 'cover' 'chat' 'compose';
+        grid-template-rows: auto auto auto auto auto minmax(0, 1fr) auto;
+        grid-template-areas: 'topbar' 'profiles' 'jobs' 'masthead' 'cover' 'chat' 'compose';
     }
+    /* TopBar's injected siblings need named rows; auto-placement put them after compose. */
+    body.bop-active #sheld > #extensionTopBar {
+        grid-area: topbar !important;
+        position: relative !important;
+        inset: auto !important;
+        order: 0 !important;
+        transform: none !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+    body.bop-active #sheld > #extensionConnectionProfiles { grid-area: profiles !important; min-width: 0; }
+    body.bop-active #sheld > #top_chat_stmb_jobs { grid-area: jobs !important; min-width: 0; }
     body.bop-active #bop-masthead { padding: 17px 0; margin-bottom: 10px; }
     body.bop-active .bop-wordmark { font-size: 25px; }
     body.bop-active .bop-edition { font-size: 9px; letter-spacing: 1px; }

@@ -231,6 +231,32 @@ body.bop-active #chat .mes .name_text {
 }
 body.bop-active #chat .mes .timestamp { font-size: 10px; color: var(--bop-muted); }
 body.bop-active #chat .mes_text { font-size: 14px !important; line-height: 2.15 !important; }
+/* Match the preview: fine rules, three outlined sparkles, and two small dots.
+   Background-only pseudo-elements stay out of copied text and message editing. */
+body.bop-active #chat .mes .mes_text::before,
+body.bop-active #chat .mes .mes_text::after {
+    content: none !important;
+    display: none !important;
+    background-image: none !important;
+}
+body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::before,
+body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::after {
+    content: "" !important;
+    display: block !important;
+    width: min(220px, 75%) !important;
+    height: 20px !important;
+    margin: 22px auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background-color: transparent !important;
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22220%22%20height%3D%2220%22%20viewBox%3D%220%200%20220%2020%22%3E%3Cpath%20d%3D%22M0%2010H42M178%2010H220%22%20fill%3D%22none%22%20stroke%3D%22%23dededb%22%20stroke-width%3D%221%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23202020%22%20stroke-width%3D%22.95%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M75%203.5Q76.5%208.5%2081.5%2010Q76.5%2011.5%2075%2016.5Q73.5%2011.5%2068.5%2010Q73.5%208.5%2075%203.5Z%22%2F%3E%3Cpath%20d%3D%22M110%203.5Q111.5%208.5%20116.5%2010Q111.5%2011.5%20110%2016.5Q108.5%2011.5%20103.5%2010Q108.5%208.5%20110%203.5Z%22%2F%3E%3Cpath%20d%3D%22M145%203.5Q146.5%208.5%20151.5%2010Q146.5%2011.5%20145%2016.5Q143.5%2011.5%20138.5%2010Q143.5%208.5%20145%203.5Z%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23202020%22%3E%3Ccircle%20cx%3D%2292.5%22%20cy%3D%2210%22%20r%3D%22.8%22%2F%3E%3Ccircle%20cx%3D%22127.5%22%20cy%3D%2210%22%20r%3D%22.8%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    flex-shrink: 0;
+}
 body.bop-active #chat .mes_text img { max-width: 100% !important; height: auto; }
 body.bop-active #send_form, body.bop-active #nonQRFormItems { min-width: 0; }
 body.bop-active #send_textarea { min-width: 0 !important; line-height: 1.8 !important; }

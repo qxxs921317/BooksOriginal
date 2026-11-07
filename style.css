@@ -240,7 +240,9 @@ body.bop-active #chat .mes .mes_text::after {
     background-image: none !important;
 }
 body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::before,
-body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::after {
+body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::after,
+body.bop-active #chat .mes[is_user="true"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::before,
+body.bop-active #chat .mes[is_user="true"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::after {
     content: "✧ · ✧ · ✧" !important;
     display: block !important;
     box-sizing: content-box !important;
@@ -269,7 +271,9 @@ body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSy
 }
 @media (max-width: 767px) {
     body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::before,
-    body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::after {
+    body.bop-active #chat .mes[is_user="false"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::after,
+    body.bop-active #chat .mes[is_user="true"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::before,
+    body.bop-active #chat .mes[is_user="true"]:not([is_system="true"]):not(.smallSysMes):not(.toolCall) .mes_text::after {
         margin: 18px auto !important;
     }
 }

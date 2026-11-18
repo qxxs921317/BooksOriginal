@@ -5,6 +5,7 @@ import { isPortraitTheme, resolvePortrait } from './portrait-core.js';
 const FOLD_KEY = 'books-original-portrait:mobile-folded:v1';
 const POSITION_PREFIX = 'books-original-portrait:mobile-position:v1:';
 const HEIGHT_KEY = 'books-original-portrait:mobile-height:v1';
+const LOCK_HEIGHT_KEY = 'books-original-portrait:lock-mobile-height:v1';
 const PERSONA_KEY = 'books-original-portrait:show-persona-while-writing:v1';
 const DEFAULT_POSITION = 30;
 const DEFAULT_HEIGHT = 100;
@@ -16,6 +17,8 @@ let folded = false;
 try { folded = localStorage.getItem(FOLD_KEY) === 'true'; } catch { /* Private browser mode. */ }
 let showPersonaWhileWriting = false;
 try { showPersonaWhileWriting = localStorage.getItem(PERSONA_KEY) === 'true'; } catch { /* Private browser mode. */ }
+let lockMobileHeight = false;
+try { lockMobileHeight = localStorage.getItem(LOCK_HEIGHT_KEY) === 'true'; } catch { /* Private browser mode. */ }
 let mobileHeight = DEFAULT_HEIGHT;
 try {
     const savedHeight = Number(localStorage.getItem(HEIGHT_KEY));
@@ -23,11 +26,12 @@ try {
         mobileHeight = savedHeight;
     }
 } catch { /* Keep the default when storage is unavailable. */ }
-let panel, masthead, modal, image, modalImage, coverName, summaryName, foldLabel, status, creditLabel;
+let panel, masthead, modal, image, modalImage, coverName, summaryName, foldLabel, status, creditLabel, photoButton;
 let positionControls, positionInput, positionReset;
 let activeKey = '', activeSource = '', sequence = 0, queued = false, lastTheme = null;
 let unavailablePersonaSource = '';
 let customStyle, chatElement;
+let viewportWidth = window.innerWidth;
 const themeObserver = new MutationObserver(schedule);
 const chatObserver = new MutationObserver(records => {
     // Child lists on #chat only: streaming text does not rebuild the photo panel.
@@ -76,6 +80,19 @@ function applyMobileHeight() {
     panel?.style.setProperty('--bop-mobile-height-scale', String(mobileHeight / 100));
 }
 
+function updateKeyboardHeight(focused = document.activeElement?.id === 'send_textarea') {
+    if (!panel) return;
+    panel.style.removeProperty('--bop-mobile-photo-base');
+    if (!lockMobileHeight || !mq.matches || !focused) return;
+
+    // Focus occurs before the keyboard resizes the viewport. Preserve the base
+    // height so the mobile height slider can still scale it.
+    const height = Number.parseFloat(getComputedStyle(photoButton).height);
+    if (height > 0) {
+        panel.style.setProperty('--bop-mobile-photo-base', `${height * 100 / mobileHeight}px`);
+    }
+}
+
 function mountSettings() {
     const container = document.getElementById('extensions_settings2') ?? document.getElementById('extensions_settings');
     if (!container || document.getElementById('bop-settings')) return;
@@ -122,7 +139,18 @@ function mountSettings() {
         try { localStorage.setItem(HEIGHT_KEY, String(mobileHeight)); } catch { /* Keep the current height. */ }
     });
     controls.append(label, value, slider);
-    settings.append(summary, personaLabel, controls);
+
+    const lockLabel = create('label', 'checkbox_label bop-mobile-height-lock');
+    const lockCheckbox = create('input');
+    lockCheckbox.type = 'checkbox';
+    lockCheckbox.checked = lockMobileHeight;
+    lockCheckbox.addEventListener('change', () => {
+        lockMobileHeight = lockCheckbox.checked;
+        try { localStorage.setItem(LOCK_HEIGHT_KEY, String(lockMobileHeight)); } catch { /* Keep the current setting. */ }
+        updateKeyboardHeight();
+    });
+    lockLabel.append(lockCheckbox, create('span', '', '키보드가 열려도 초상화 높이 유지'));
+    settings.append(summary, personaLabel, controls, lockLabel);
     container.append(settings);
 }
 
@@ -153,7 +181,7 @@ function mount(sheld) {
 
     const figure = create('figure', 'bop-figure');
     const frame = create('div', 'bop-frame');
-    const photoButton = create('button', 'bop-photo-button');
+    photoButton = create('button', 'bop-photo-button');
     photoButton.type = 'button';
     photoButton.setAttribute('aria-label', '사진 원본 크게 보기');
     photoButton.title = '사진을 누르면 원본을 크게 볼 수 있어요';
@@ -207,6 +235,7 @@ function mount(sheld) {
     const chat = sheld.querySelector('#chat');
     sheld.insertBefore(masthead, chat);
     sheld.insertBefore(panel, chat);
+    updateKeyboardHeight();
 
     modal = create('dialog', 'bop-lightbox');
     modal.id = 'bop-lightbox';
@@ -352,6 +381,19 @@ function boot() {
     });
     document.addEventListener('input', event => {
         if (event.target?.matches?.('#customCSS') || (showPersonaWhileWriting && event.target?.id === 'send_textarea')) schedule();
+    });
+    document.addEventListener('focusin', event => {
+        if (event.target?.id === 'send_textarea') updateKeyboardHeight(true);
+    });
+    document.addEventListener('focusout', event => {
+        if (event.target?.id === 'send_textarea') updateKeyboardHeight(false);
+    });
+    window.addEventListener('resize', () => {
+        // Height-only resizes include the soft keyboard. Re-measure on a width
+        // change so a rotation does not keep the previous orientation's size.
+        if (window.innerWidth === viewportWidth) return;
+        viewportWidth = window.innerWidth;
+        updateKeyboardHeight();
     });
     // Observe replacement/creation of the custom theme style, never the entire chat subtree.
     new MutationObserver(schedule).observe(document.head, { childList: true });

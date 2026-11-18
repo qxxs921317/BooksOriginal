@@ -2,7 +2,11 @@
 #bop-masthead, #bop-cover, #bop-lightbox { display: none; }
 #bop-cover[hidden], #bop-cover [hidden], #bop-lightbox [hidden] { display: none !important; }
 #bop-cover .bop-position-controls { display: none; }
-#bop-settings { display: none; }
+#bop-settings { display: block; }
+#bop-settings > summary::-webkit-details-marker { display: none; }
+#bop-settings[open] > summary .inline-drawer-icon { transform: rotate(180deg); }
+#bop-settings .bop-persona-option { margin: 6px 0 10px; }
+#bop-settings .bop-height-controls { display: none; }
 
 body.bop-active {
     --bop-paper: #fff;
@@ -326,9 +330,6 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     cursor: pointer;
 }
 @media (max-width: 767px) {
-    #bop-settings { display: block; }
-    #bop-settings > summary::-webkit-details-marker { display: none; }
-    #bop-settings[open] > summary .inline-drawer-icon { transform: rotate(180deg); }
     #bop-settings .bop-height-controls {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -514,9 +515,9 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     }
     body.bop-active .bop-tagline, body.bop-active .bop-caption-rule, body.bop-active .bop-motto { display: none; }
     body.bop-active #chat { padding: 0 0 6px !important; scrollbar-gutter: auto; }
-    /* Let the name and timestamp wrap beside the actions, then align the actions to the last line. */
+    /* Keep the actions centered beside the name and timestamp when they wrap. */
     body.bop-active #chat .mes_block > .ch_name > .flex1 { flex-basis: 0; min-width: 0; }
-    body.bop-active #chat .mes_block > .ch_name > .mes_buttons { align-self: flex-end; }
+    body.bop-active #chat .mes_block > .ch_name > .mes_buttons { align-self: center; }
     /* Remove stacked padding from the old theme's message and message-block wrappers. */
     body.bop-active #chat .mes,
     body.bop-active #chat .mes .mes_block {

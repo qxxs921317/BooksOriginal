@@ -1,9 +1,11 @@
+import { getUserAvatar, user_avatar } from '../../../../script.js';
 import { getContext } from '../../../extensions.js';
 import { isPortraitTheme, resolvePortrait } from './portrait-core.js';
 
 const FOLD_KEY = 'books-original-portrait:mobile-folded:v1';
 const POSITION_PREFIX = 'books-original-portrait:mobile-position:v1:';
 const HEIGHT_KEY = 'books-original-portrait:mobile-height:v1';
+const PERSONA_KEY = 'books-original-portrait:show-persona-while-writing:v1';
 const DEFAULT_POSITION = 30;
 const DEFAULT_HEIGHT = 100;
 const MIN_HEIGHT = 50;
@@ -12,6 +14,8 @@ const positionCache = new Map();
 const mq = matchMedia('(max-width: 767px)');
 let folded = false;
 try { folded = localStorage.getItem(FOLD_KEY) === 'true'; } catch { /* Private browser mode. */ }
+let showPersonaWhileWriting = false;
+try { showPersonaWhileWriting = localStorage.getItem(PERSONA_KEY) === 'true'; } catch { /* Private browser mode. */ }
 let mobileHeight = DEFAULT_HEIGHT;
 try {
     const savedHeight = Number(localStorage.getItem(HEIGHT_KEY));
@@ -19,9 +23,10 @@ try {
         mobileHeight = savedHeight;
     }
 } catch { /* Keep the default when storage is unavailable. */ }
-let panel, masthead, modal, image, modalImage, coverName, summaryName, foldLabel, status;
+let panel, masthead, modal, image, modalImage, coverName, summaryName, foldLabel, status, creditLabel;
 let positionControls, positionInput, positionReset;
 let activeKey = '', activeSource = '', sequence = 0, queued = false, lastTheme = null;
+let unavailablePersonaSource = '';
 let customStyle, chatElement;
 const themeObserver = new MutationObserver(schedule);
 const chatObserver = new MutationObserver(records => {
@@ -82,6 +87,17 @@ function mountSettings() {
     chevron.setAttribute('aria-hidden', 'true');
     summary.append(create('b', '', 'BooksOriginal · Portrait'), chevron);
 
+    const personaLabel = create('label', 'checkbox_label bop-persona-option');
+    const personaCheckbox = create('input');
+    personaCheckbox.type = 'checkbox';
+    personaCheckbox.checked = showPersonaWhileWriting;
+    personaCheckbox.addEventListener('change', () => {
+        showPersonaWhileWriting = personaCheckbox.checked;
+        try { localStorage.setItem(PERSONA_KEY, String(showPersonaWhileWriting)); } catch { /* Keep the current setting. */ }
+        schedule();
+    });
+    personaLabel.append(personaCheckbox, create('span', '', '입력 중 페르소나 사진 표시'));
+
     const controls = create('div', 'bop-height-controls');
     const label = create('label', '', '모바일 사진 높이');
     const value = create('span');
@@ -106,7 +122,7 @@ function mountSettings() {
         try { localStorage.setItem(HEIGHT_KEY, String(mobileHeight)); } catch { /* Keep the current height. */ }
     });
     controls.append(label, value, slider);
-    settings.append(summary, controls);
+    settings.append(summary, personaLabel, controls);
     container.append(settings);
 }
 
@@ -116,7 +132,8 @@ function updateFold() {
     if (panel.open !== open) panel.open = open;
     foldLabel.textContent = open ? 'ON' : 'OFF';
     summaryName.textContent = mq.matches ? 'BooksOriginal'
-        : panel.dataset.group === 'true' ? 'GROUP PORTRAIT' : 'CHARACTER PORTRAIT';
+        : panel.dataset.persona === 'true' ? 'PERSONA PORTRAIT'
+            : panel.dataset.group === 'true' ? 'GROUP PORTRAIT' : 'CHARACTER PORTRAIT';
 }
 
 function mount(sheld) {
@@ -127,7 +144,7 @@ function mount(sheld) {
 
     panel = create('details', 'bop-cover');
     panel.id = 'bop-cover';
-    panel.setAttribute('aria-label', '캐릭터 사진');
+    panel.setAttribute('aria-label', '초상 사진');
     applyMobileHeight();
     const summary = create('summary', 'bop-summary');
     summaryName = create('span', 'bop-summary-name', 'CHARACTER PORTRAIT');
@@ -138,7 +155,7 @@ function mount(sheld) {
     const frame = create('div', 'bop-frame');
     const photoButton = create('button', 'bop-photo-button');
     photoButton.type = 'button';
-    photoButton.setAttribute('aria-label', '캐릭터 사진 원본 크게 보기');
+    photoButton.setAttribute('aria-label', '사진 원본 크게 보기');
     photoButton.title = '사진을 누르면 원본을 크게 볼 수 있어요';
     image = create('img', 'bop-image');
     image.decoding = 'async';
@@ -147,7 +164,8 @@ function mount(sheld) {
     status.setAttribute('role', 'status');
     photoButton.append(image, status);
     const credit = create('div', 'bop-photo-credit');
-    credit.append(create('span', '', 'CHARACTER PORTRAIT'), create('span', '', '✧'));
+    creditLabel = create('span', '', 'CHARACTER PORTRAIT');
+    credit.append(creditLabel, create('span', '', '✧'));
     frame.append(photoButton, credit);
     const caption = create('figcaption', 'bop-caption');
     coverName = create('div', 'bop-name');
@@ -192,7 +210,7 @@ function mount(sheld) {
 
     modal = create('dialog', 'bop-lightbox');
     modal.id = 'bop-lightbox';
-    modal.setAttribute('aria-label', '캐릭터 사진 원본');
+    modal.setAttribute('aria-label', '사진 원본');
     const close = create('button', 'bop-lightbox-close', '닫기 ×');
     close.type = 'button';
     modalImage = create('img', 'bop-lightbox-image');
@@ -220,9 +238,10 @@ function mount(sheld) {
 
 function showPortrait(portrait) {
     panel.dataset.group = String(portrait.group);
+    panel.dataset.persona = String(Boolean(portrait.persona));
     coverName.textContent = portrait.name;
-    image.alt = `${portrait.name} 캐릭터 사진`;
-    summaryName.textContent = portrait.group ? 'GROUP PORTRAIT' : 'CHARACTER PORTRAIT';
+    image.alt = `${portrait.name} ${portrait.persona ? '페르소나' : '캐릭터'} 사진`;
+    creditLabel.textContent = portrait.persona ? 'PERSONA PORTRAIT' : 'CHARACTER PORTRAIT';
     if (activeKey === portrait.key && activeSource === portrait.source) return;
     const previousSource = activeSource;
     activeKey = portrait.key;
@@ -245,6 +264,11 @@ function showPortrait(portrait) {
     };
     image.onerror = () => {
         if (sequence !== current) return;
+        if (portrait.persona) {
+            unavailablePersonaSource = portrait.source;
+            schedule();
+            return;
+        }
         image.hidden = true;
         status.hidden = false;
         setPositionAvailable(false);
@@ -281,7 +305,16 @@ function refresh() {
         chatObserver.disconnect();
         if (chatElement) chatObserver.observe(chatElement, { childList: true });
     }
-    const portrait = resolvePortrait(context);
+    const characterPortrait = resolvePortrait(context);
+    const isWriting = showPersonaWhileWriting && document.getElementById('send_textarea')?.value.trim();
+    if (!isWriting) unavailablePersonaSource = '';
+    let portrait = characterPortrait;
+    if (characterPortrait && isWriting && user_avatar) {
+        const source = `/${getUserAvatar(encodeURIComponent(user_avatar))}`;
+        if (source !== unavailablePersonaSource) {
+            portrait = { name: context.name1 || 'Persona', source, key: source, group: false, persona: true };
+        }
+    }
     document.body.classList.toggle('bop-has-portrait', Boolean(portrait));
     panel.hidden = !portrait;
     if (portrait) showPortrait(portrait);
@@ -307,7 +340,7 @@ function schedule() {
 function boot() {
     const context = getContext();
     mountSettings();
-    const names = ['APP_READY', 'CHAT_CHANGED', 'CHARACTER_EDITED', 'CHARACTER_EDITED_PORTRAIT', 'CHARACTER_SELECTED', 'MESSAGE_RECEIVED', 'MESSAGE_DELETED', 'MESSAGE_SWIPED', 'SETTINGS_UPDATED', 'UI_SETTINGS_UPDATED', 'THEME_CHANGED'];
+    const names = ['APP_READY', 'CHAT_CHANGED', 'CHARACTER_EDITED', 'CHARACTER_EDITED_PORTRAIT', 'CHARACTER_SELECTED', 'MESSAGE_SENT', 'MESSAGE_RECEIVED', 'MESSAGE_DELETED', 'MESSAGE_SWIPED', 'PERSONA_CHANGED', 'PERSONA_RENAMED', 'SETTINGS_UPDATED', 'UI_SETTINGS_UPDATED', 'THEME_CHANGED'];
     for (const name of names) {
         const event = context.eventTypes?.[name];
         if (event) context.eventSource?.on(event, schedule);
@@ -318,7 +351,7 @@ function boot() {
         if (event.target?.matches?.('#themes, #theme_select, #ui-preset-select')) schedule();
     });
     document.addEventListener('input', event => {
-        if (event.target?.matches?.('#customCSS')) schedule();
+        if (event.target?.matches?.('#customCSS') || (showPersonaWhileWriting && event.target?.id === 'send_textarea')) schedule();
     });
     // Observe replacement/creation of the custom theme style, never the entire chat subtree.
     new MutationObserver(schedule).observe(document.head, { childList: true });

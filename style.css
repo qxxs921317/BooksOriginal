@@ -2,6 +2,7 @@
 #bop-masthead, #bop-cover, #bop-lightbox { display: none; }
 #bop-cover[hidden], #bop-cover [hidden], #bop-lightbox [hidden] { display: none !important; }
 #bop-cover .bop-position-controls { display: none; }
+#bop-settings { display: none; }
 
 body.bop-active {
     --bop-paper: #fff;
@@ -325,6 +326,21 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     cursor: pointer;
 }
 @media (max-width: 767px) {
+    #bop-settings { display: block; }
+    #bop-settings > summary::-webkit-details-marker { display: none; }
+    #bop-settings[open] > summary .inline-drawer-icon { transform: rotate(180deg); }
+    #bop-settings .bop-height-controls {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 6px 12px;
+        padding: 4px 0 12px;
+    }
+    #bop-height-slider {
+        grid-column: 1 / -1;
+        margin: 8px 0;
+    }
+
     body.bop-active { --sheldWidth: 100vw; }
     body.bop-active #sheld {
         width: 100% !important;
@@ -383,36 +399,33 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     }
     body.bop-active #bop-cover .bop-fold-label {
         padding: 6px 0 6px 10px;
-        font: 400 12px/1.5 'Noto Serif KR', Georgia, serif;
+        font: 400 11px/1.5 Arial, sans-serif;
         text-decoration: underline;
         text-underline-offset: 4px;
-        letter-spacing: 0;
         color: var(--bop-ink);
     }
     body.bop-active .bop-figure { position: relative; }
     body.bop-active .bop-frame { padding: 6px; }
     body.bop-active #bop-cover .bop-photo-button {
-        height: clamp(160px, 28vh, 300px);
-        height: clamp(160px, 28dvh, 300px);
+        height: calc(clamp(160px, 28vh, 300px) * var(--bop-mobile-height-scale, 1));
+        height: calc(clamp(160px, 28dvh, 300px) * var(--bop-mobile-height-scale, 1));
     }
     body.bop-active #bop-cover .bop-image { object-position: 50% var(--bop-mobile-y, 30%) !important; }
     body.bop-active #bop-cover .bop-position-controls {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto auto;
         align-items: center;
-        gap: 9px;
-        min-height: 34px;
-        margin: 2px 0 0;
+        gap: 6px;
         padding: 0 2px;
         color: var(--bop-muted);
         background: var(--bop-paper);
-        font: 400 11px/1.4 'Noto Serif KR', Georgia, serif;
+        font: 400 10px/1 Arial, sans-serif;
     }
     body.bop-active #bop-cover .bop-position-slider {
         display: block;
         width: 100% !important;
         min-width: 0 !important;
-        height: 26px !important;
+        height: 24px !important;
         margin: 0 !important;
         padding: 0 !important;
         border: 0 !important;
@@ -432,9 +445,9 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     body.bop-active #bop-cover .bop-position-slider::-webkit-slider-thumb {
         appearance: none;
         -webkit-appearance: none;
-        width: 14px;
-        height: 14px;
-        margin-top: -6px;
+        width: 12px;
+        height: 12px;
+        margin-top: -5px;
         border: 1px solid var(--bop-ink);
         border-radius: 50%;
         background: var(--bop-paper);
@@ -447,8 +460,8 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         background: var(--bop-line);
     }
     body.bop-active #bop-cover .bop-position-slider::-moz-range-thumb {
-        width: 12px;
-        height: 12px;
+        width: 10px;
+        height: 10px;
         border: 1px solid var(--bop-ink);
         border-radius: 50%;
         background: var(--bop-paper);
@@ -456,13 +469,14 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     }
     body.bop-active #bop-cover .bop-position-reset {
         margin: 0;
-        padding: 6px 2px 6px 5px;
-        min-height: 32px;
+        padding: 0;
+        min-width: 24px;
+        min-height: 24px;
         border: 0;
         border-radius: 0;
         background: transparent;
         color: var(--bop-muted);
-        font: inherit;
+        font: 400 15px/1 Arial, sans-serif;
         box-shadow: none;
         cursor: pointer;
     }
@@ -477,15 +491,28 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         left: 7px;
         right: 7px;
         bottom: 7px;
-        padding: 40px 18px 15px;
+        display: grid;
+        align-content: end;
+        box-sizing: border-box;
+        min-height: min(94px, calc(100% - 14px));
+        max-height: calc(100% - 14px);
+        padding: 0 18px;
+        overflow: hidden;
         pointer-events: none;
         color: #fff;
         background: linear-gradient(transparent, rgba(0, 0, 0, .72));
     }
     body.bop-active .bop-caption .bop-kicker { color: #fff; font-size: 9px; letter-spacing: 2px; }
-    body.bop-active .bop-caption .bop-name { color: #fff; margin: 4px 0 0; font-size: 31px; }
+    body.bop-active .bop-caption .bop-name {
+        color: #fff;
+        margin: 0 0 calc(15px * min(1, var(--bop-mobile-height-scale, 1)));
+        font-size: 31px;
+    }
     body.bop-active .bop-tagline, body.bop-active .bop-caption-rule, body.bop-active .bop-motto { display: none; }
     body.bop-active #chat { padding: 0 0 6px !important; scrollbar-gutter: auto; }
+    /* Let the name and timestamp wrap beside the actions, then align the actions to the last line. */
+    body.bop-active #chat .mes_block > .ch_name > .flex1 { flex-basis: 0; min-width: 0; }
+    body.bop-active #chat .mes_block > .ch_name > .mes_buttons { align-self: flex-end; }
     /* Remove stacked padding from the old theme's message and message-block wrappers. */
     body.bop-active #chat .mes,
     body.bop-active #chat .mes .mes_block {
@@ -510,7 +537,9 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
 }
 @media (max-width: 767px) and (max-height: 560px) {
     body.bop-active #bop-masthead { padding: 10px 0; margin-bottom: 3px; }
-    body.bop-active #bop-cover .bop-photo-button { height: clamp(90px, 20dvh, 150px); }
+    body.bop-active #bop-cover .bop-photo-button {
+        height: calc(clamp(90px, 20dvh, 150px) * var(--bop-mobile-height-scale, 1));
+    }
 }
 @media (max-height: 650px) and (min-width: 768px) {
     body.bop-active #bop-cover .bop-photo-button { height: 45dvh; }

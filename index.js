@@ -3,11 +3,22 @@ import { isPortraitTheme, resolvePortrait } from './portrait-core.js';
 
 const FOLD_KEY = 'books-original-portrait:mobile-folded:v1';
 const POSITION_PREFIX = 'books-original-portrait:mobile-position:v1:';
+const HEIGHT_KEY = 'books-original-portrait:mobile-height:v1';
 const DEFAULT_POSITION = 30;
+const DEFAULT_HEIGHT = 100;
+const MIN_HEIGHT = 50;
+const MAX_HEIGHT = 140;
 const positionCache = new Map();
 const mq = matchMedia('(max-width: 767px)');
 let folded = false;
 try { folded = localStorage.getItem(FOLD_KEY) === 'true'; } catch { /* Private browser mode. */ }
+let mobileHeight = DEFAULT_HEIGHT;
+try {
+    const savedHeight = Number(localStorage.getItem(HEIGHT_KEY));
+    if (Number.isInteger(savedHeight) && savedHeight >= MIN_HEIGHT && savedHeight <= MAX_HEIGHT) {
+        mobileHeight = savedHeight;
+    }
+} catch { /* Keep the default when storage is unavailable. */ }
 let panel, masthead, modal, image, modalImage, coverName, summaryName, foldLabel, status;
 let positionControls, positionInput, positionReset;
 let activeKey = '', activeSource = '', sequence = 0, queued = false, lastTheme = null;
@@ -56,11 +67,54 @@ function setPositionAvailable(available) {
     positionReset.disabled = !available;
 }
 
+function applyMobileHeight() {
+    panel?.style.setProperty('--bop-mobile-height-scale', String(mobileHeight / 100));
+}
+
+function mountSettings() {
+    const container = document.getElementById('extensions_settings2') ?? document.getElementById('extensions_settings');
+    if (!container || document.getElementById('bop-settings')) return;
+
+    const settings = create('details', 'extension_container');
+    settings.id = 'bop-settings';
+    const summary = create('summary', 'inline-drawer-header');
+    const chevron = create('i', 'inline-drawer-icon fa-solid fa-circle-chevron-down');
+    chevron.setAttribute('aria-hidden', 'true');
+    summary.append(create('b', '', 'BooksOriginal · Portrait'), chevron);
+
+    const controls = create('div', 'bop-height-controls');
+    const label = create('label', '', '모바일 사진 높이');
+    const value = create('span');
+    value.setAttribute('aria-hidden', 'true');
+    const slider = create('input');
+    slider.id = 'bop-height-slider';
+    slider.type = 'range';
+    slider.min = String(MIN_HEIGHT);
+    slider.max = String(MAX_HEIGHT);
+    slider.value = String(mobileHeight);
+    label.htmlFor = slider.id;
+    const updateHeight = () => {
+        mobileHeight = slider.valueAsNumber;
+        value.textContent = `${mobileHeight}%`;
+        slider.setAttribute('aria-valuetext', `기본 높이의 ${mobileHeight}%`);
+        applyMobileHeight();
+    };
+    updateHeight();
+    slider.addEventListener('input', updateHeight);
+    slider.addEventListener('change', () => {
+        updateHeight();
+        try { localStorage.setItem(HEIGHT_KEY, String(mobileHeight)); } catch { /* Keep the current height. */ }
+    });
+    controls.append(label, value, slider);
+    settings.append(summary, controls);
+    container.append(settings);
+}
+
 function updateFold() {
     if (!panel) return;
     const open = !mq.matches || !folded;
     if (panel.open !== open) panel.open = open;
-    foldLabel.textContent = open ? '사진 접기' : '사진 펼치기';
+    foldLabel.textContent = open ? 'ON' : 'OFF';
     summaryName.textContent = mq.matches ? 'BooksOriginal'
         : panel.dataset.group === 'true' ? 'GROUP PORTRAIT' : 'CHARACTER PORTRAIT';
 }
@@ -74,9 +128,10 @@ function mount(sheld) {
     panel = create('details', 'bop-cover');
     panel.id = 'bop-cover';
     panel.setAttribute('aria-label', '캐릭터 사진');
+    applyMobileHeight();
     const summary = create('summary', 'bop-summary');
     summaryName = create('span', 'bop-summary-name', 'CHARACTER PORTRAIT');
-    foldLabel = create('span', 'bop-fold-label', '사진 접기');
+    foldLabel = create('span', 'bop-fold-label');
     summary.append(summaryName, foldLabel);
 
     const figure = create('figure', 'bop-figure');
@@ -103,8 +158,8 @@ function mount(sheld) {
     positionControls = create('div', 'bop-position-controls');
     positionControls.setAttribute('role', 'group');
     positionControls.setAttribute('aria-label', '사진 상하 위치');
-    const topLabel = create('span', 'bop-position-end', '위');
-    const bottomLabel = create('span', 'bop-position-end', '아래');
+    const topLabel = create('span', 'bop-position-end', 'UP');
+    const bottomLabel = create('span', 'bop-position-end', 'DOWN');
     topLabel.setAttribute('aria-hidden', 'true');
     bottomLabel.setAttribute('aria-hidden', 'true');
     positionInput = create('input', 'bop-position-slider');
@@ -115,9 +170,10 @@ function mount(sheld) {
     positionInput.step = '1';
     positionInput.value = String(DEFAULT_POSITION);
     positionInput.setAttribute('aria-label', '사진 상하 위치');
-    positionReset = create('button', 'bop-position-reset', '초기화');
+    positionReset = create('button', 'bop-position-reset', '↺');
     positionReset.type = 'button';
     positionReset.setAttribute('aria-label', '사진 위치 초기화');
+    positionReset.title = '사진 위치 초기화';
     positionControls.append(topLabel, positionInput, bottomLabel, positionReset);
     panel.append(summary, figure, positionControls);
     setPositionAvailable(false);
@@ -250,6 +306,7 @@ function schedule() {
 
 function boot() {
     const context = getContext();
+    mountSettings();
     const names = ['APP_READY', 'CHAT_CHANGED', 'CHARACTER_EDITED', 'CHARACTER_EDITED_PORTRAIT', 'CHARACTER_SELECTED', 'MESSAGE_RECEIVED', 'MESSAGE_DELETED', 'MESSAGE_SWIPED', 'SETTINGS_UPDATED', 'UI_SETTINGS_UPDATED', 'THEME_CHANGED'];
     for (const name of names) {
         const event = context.eventTypes?.[name];

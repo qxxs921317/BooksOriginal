@@ -534,7 +534,7 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         height: var(--bop-extra-actions-height);
         box-sizing: border-box;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: safe flex-end;
         overflow: auto hidden;
         scrollbar-width: none;
     }

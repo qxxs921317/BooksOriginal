@@ -423,6 +423,8 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         font: 400 10px/1 Arial, sans-serif;
     }
     body.bop-active #bop-cover .bop-position-slider {
+        --bop-slider-line: #c8c4ba;
+        --bop-slider-edge: #999489;
         display: block;
         width: 100% !important;
         min-width: 0 !important;
@@ -433,37 +435,38 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
         border-radius: 0 !important;
         background: transparent !important;
         box-shadow: none !important;
+        filter: none;
         appearance: none !important;
         -webkit-appearance: none !important;
         touch-action: pan-y;
     }
     body.bop-active #bop-cover .bop-position-slider::-webkit-slider-runnable-track {
-        height: 2px;
+        height: 1px;
         border: 0;
-        border-radius: 2px;
-        background: var(--bop-line);
+        background: var(--bop-slider-line);
     }
     body.bop-active #bop-cover .bop-position-slider::-webkit-slider-thumb {
         appearance: none;
         -webkit-appearance: none;
+        box-sizing: border-box;
         width: 12px;
         height: 12px;
-        margin-top: -5px;
-        border: 1px solid var(--bop-ink);
+        margin-top: -5.5px;
+        border: 1px solid var(--bop-slider-edge);
         border-radius: 50%;
         background: var(--bop-paper);
         box-shadow: none;
     }
     body.bop-active #bop-cover .bop-position-slider::-moz-range-track {
-        height: 2px;
+        height: 1px;
         border: 0;
-        border-radius: 2px;
-        background: var(--bop-line);
+        background: var(--bop-slider-line);
     }
     body.bop-active #bop-cover .bop-position-slider::-moz-range-thumb {
-        width: 10px;
-        height: 10px;
-        border: 1px solid var(--bop-ink);
+        box-sizing: border-box;
+        width: 12px;
+        height: 12px;
+        border: 1px solid var(--bop-slider-edge);
         border-radius: 50%;
         background: var(--bop-paper);
         box-shadow: none;

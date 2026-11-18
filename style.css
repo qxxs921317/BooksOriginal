@@ -377,6 +377,7 @@ body.bop-active #bop-lightbox .bop-lightbox-close {
     body.bop-active .bop-wordmark { font-size: 25px; }
     body.bop-active .bop-edition { font-size: 9px; letter-spacing: 1px; }
     body.bop-active #bop-cover { margin: 0 0 6px; padding: 0; }
+    body.bop-active #bop-cover[open]:has(> .bop-position-controls:not([hidden])) { margin-bottom: 0; }
     body.bop-active #bop-cover .bop-summary {
         display: flex;
         align-items: center;
